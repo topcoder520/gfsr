@@ -1,11 +1,15 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/topcoder520/gfsr/fileserver/logs"
+	"github.com/topcoder520/gfsr/fileserver/middleware"
 )
 
 var httpCommand = &cobra.Command{
@@ -13,7 +17,11 @@ var httpCommand = &cobra.Command{
 	Short:   "HTTP protocol file server",
 	Example: "gofileserver http [-port 80] [-dir path] ",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return startServer(args)
+		if err := startServer(args); err != nil {
+			logs.Error(err)
+			return err
+		}
+		return nil
 	},
 }
 
@@ -27,23 +35,31 @@ func init() {
 }
 
 func startServer(args []string) error {
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(rw, "uklj")
-	})
-	http.ListenAndServe(fmt.Sprintf(":%d", port), middleWare(mux))
-
-	return nil
-}
-
-func middleWare(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		logs.Println(r.URL.Query())
-		if len(r.URL.Query().Get("skip")) > 0 {
-			fmt.Fprintln(rw, "ok")
-			return
+	absPath, err := filepath.Abs(filepath.Clean(dir))
+	if err != nil {
+		return err
+	}
+	f, err := os.Open(absPath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return err
 		}
-		next.ServeHTTP(rw, r)
-	})
+		err = os.Mkdir(absPath, 0600)
+		if err != nil {
+			return err
+		}
+	} else {
+		fileInfo, err := f.Stat()
+		f.Close()
+		if err != nil {
+			return err
+		}
+		if !fileInfo.IsDir() {
+			return errors.New("dir not directory")
+		}
+	}
+	logs.Printf("listening port: %d \n", port)
+	logs.Printf("server directory: %s\n", absPath)
+	logs.Println("http fileserver started successfully.")
+	return http.ListenAndServe(fmt.Sprintf(":%d", port), middleware.FileServerMiddleWare(http.FileServer(http.Dir(absPath))))
 }

@@ -22,21 +22,21 @@ func FileServerMiddleWare(next http.Handler) http.Handler {
 		session := session.GetSession(rw, r)
 		//访问日志
 		r.ParseForm()
-		logs.AccessLog.Printf("method:%s\nip:%s\nreferer:%s\nurl:%s\nuserAgent:%s\n",
-			r.Method, r.RemoteAddr, r.Referer(), r.URL, r.Header["User-Agent"])
-		logs.AccessLog.Println("header:", r.Header)
-		logs.AccessLog.Println("formInfo:", r.PostForm)
-		logs.AccessLog.Println("[END]")
+		logs.AccessLog.Printf("method:%s | ip:%s | referer:%s | userAgent:%s\n[END]\n",
+			r.Method, r.RemoteAddr, r.Referer(), r.Header["User-Agent"])
 		//登录验证
-		token := session.Get(tokenName)
-		if token == nil {
-			//跳转登录页面
-			return
-		}
-		//获取请求的token
-		if r.Header.Get("LOGIN-ACESS-TOKEN") != token {
-			//跳转登录页面
-			return
+		uri := r.RequestURI
+		if uri != "/login" {
+			token := session.Get(tokenName)
+			if token == nil {
+				//跳转登录页面
+				return
+			}
+			//获取请求的token
+			if r.Header.Get("LOGIN-ACESS-TOKEN") != token {
+				//跳转登录页面
+				return
+			}
 		}
 		next.ServeHTTP(rw, r)
 	})

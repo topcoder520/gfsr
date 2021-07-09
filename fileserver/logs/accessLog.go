@@ -8,16 +8,18 @@ import (
 
 var AccessLog *log.Logger
 
-func init() {
-	path, err := filepath.Abs("./log/access.log")
+func InitAccessLog(dir string) {
+	path, err := filepath.Abs(dir)
 	if err != nil {
 		ErrorF("Abs file path, access.log err: ", err)
 		return
 	}
-	logFile, err := os.Create(path)
+	os.MkdirAll(path, 0600)
+
+	logFile, err := os.OpenFile(filepath.Clean(path+"/access.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		ErrorF("open access.log err: ", err)
 		return
 	}
-	AccessLog = log.New(logFile, "[request]", log.Ldate|log.Lmicroseconds)
+	AccessLog = log.New(logFile, "[INFO]", log.Ldate|log.Lmicroseconds)
 }

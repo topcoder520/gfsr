@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/topcoder520/gfsr/fileserver/config"
+	"github.com/topcoder520/gfsr/fileserver/handler"
 	"github.com/topcoder520/gfsr/fileserver/logs"
 	"github.com/topcoder520/gfsr/fileserver/middleware"
 )
@@ -15,7 +17,7 @@ import (
 var httpCommand = &cobra.Command{
 	Use:     "http",
 	Short:   "HTTP protocol file server",
-	Example: "gofileserver http [-port 80] [-dir path] ",
+	Example: "gofileserver http [-p 80] [-d path] ",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := startServer(args); err != nil {
 			logs.Error(err)
@@ -25,17 +27,14 @@ var httpCommand = &cobra.Command{
 	},
 }
 
-var port int
-var dir string //file server root dir
-
 func init() {
 	RootCommand.AddCommand(httpCommand)
-	httpCommand.Flags().IntVarP(&port, "port", "p", 80, "The port of server listening on")
-	httpCommand.Flags().StringVarP(&dir, "dir", "d", ".", "server directory")
+	httpCommand.Flags().IntVarP(&config.Port, "port", "p", 80, "The port of server listening on")
+	httpCommand.Flags().StringVarP(&config.Dir, "dir", "d", ".", "server directory")
 }
 
 func startServer(args []string) error {
-	absPath, err := filepath.Abs(filepath.Clean(dir))
+	absPath, err := filepath.Abs(filepath.Clean(config.Dir))
 	if err != nil {
 		return err
 	}
@@ -58,8 +57,11 @@ func startServer(args []string) error {
 			return errors.New("dir not directory")
 		}
 	}
-	logs.Printf("listening port: %d \n", port)
-	logs.Printf("server directory: %s\n", absPath)
+	//http.FileServer(http.Dir(absPath))
+	config.AbsDir = absPath
+	logs.Printf("listening port: %d \n", config.Port)
+	logs.Printf("server directory: %s\n", config.AbsDir)
 	logs.Println("http fileserver started successfully.")
-	return http.ListenAndServe(fmt.Sprintf(":%d", port), middleware.FileServerMiddleWare(http.FileServer(http.Dir(absPath))))
+	return http.ListenAndServe(fmt.Sprintf(":%d", config.Port),
+		middleware.FileServerMiddleWare(handler.GetServeMux()))
 }

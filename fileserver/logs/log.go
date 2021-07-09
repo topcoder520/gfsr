@@ -8,13 +8,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-func init() {
-	path, err := filepath.Abs("./log/sys.log")
+func InitSysLog(dir string) {
+	path, err := filepath.Abs(dir)
 	if err != nil {
 		ErrorF("Abs file path, sys.log err: ", err)
 		return
 	}
-	logFile, err := os.Create(path)
+	os.MkdirAll(path, 0600)
+	logFile, err := os.OpenFile(filepath.Clean(path+"/sys.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		ErrorF("open sys.log err: ", err)
 		return

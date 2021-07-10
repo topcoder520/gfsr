@@ -15,12 +15,12 @@ func InitSysLog(dir string) {
 		return
 	}
 	os.MkdirAll(path, 0600)
-	logFile, err := os.OpenFile(filepath.Clean(path+"/sys.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+	_, err = os.OpenFile(filepath.Clean(path+"/sys.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		ErrorF("open sys.log err: ", err)
 		return
 	}
-	log.SetOutput(logFile)
+	log.SetOutput(os.Stdout)
 }
 
 func Println(msg interface{}) {

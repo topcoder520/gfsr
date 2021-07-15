@@ -11,8 +11,8 @@
             "mode": "debug",
             "program": "D:/Golang/workspace/src/github.com/topcoder520/gfsr/fileserver/main.go",
             "env": {},
-            //"args": ["http","-p","8080"] //http
-            "args": ["https","-p","8080","--ca","./cert/ca.pem","--ser","./cert/server.pem","--key","./cert/server.key"] //https
+            "args": ["http","-p","8080"] //http
+            //"args": ["https","-p","8080","--ca","./cert/ca.pem","--ser","./cert/server.pem","--key","./cert/server.key"] //https
         }
     ]
 }

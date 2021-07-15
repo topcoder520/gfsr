@@ -33,21 +33,16 @@ func FileServerMiddleWare(next http.Handler) http.Handler {
 				http.Redirect(rw, r, "/login", http.StatusFound)
 				return
 			}
-			/* //验证token
+			//验证token
 			//获取请求的token
-			if r.Header.Get("LOGIN-ACESS-TOKEN") != token {
+			reToken := r.Header.Get(config.TokenName)
+			if reToken != token {
 				//跳转登录页面
 				http.Redirect(rw, r, "/login", http.StatusFound)
 				return
 			}
-			reqToken := r.Header.Get("LOGIN-ACESS-TOKEN")
-			deToken, err := cryutil.DecryptDesCBC([]byte(reqToken), []byte(config.TokenKey))
-			if err != nil {
-				logs.Error(err)
-				http.Redirect(rw, r, "/login", http.StatusFound)
-				return
-			}
-			fiels := strings.Split(string(deToken), "@")
+			strtoken := session.Get(token)
+			fiels := strings.Split(strtoken.(string), "@")
 			if len(fiels) < 2 {
 				logs.Println("fiels len less 2")
 				http.Redirect(rw, r, "/login", http.StatusFound)
@@ -56,7 +51,7 @@ func FileServerMiddleWare(next http.Handler) http.Handler {
 			if r.RemoteAddr != fiels[0] {
 				http.Redirect(rw, r, "/login", http.StatusFound)
 				return
-			} */
+			}
 		}
 		next.ServeHTTP(rw, r)
 	})

@@ -27,7 +27,7 @@ func GetServeMux() *http.ServeMux {
 	fileServerHandler := http.StripPrefix("/files/", http.FileServer(http.Dir(config.AbsDir)))
 
 	mux.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(rw, "ok")
+		//http.RedirectHandler("/files/", http.StatusOK)
 	})
 
 	mux.HandleFunc("/static/", func(rw http.ResponseWriter, r *http.Request) {
@@ -87,17 +87,11 @@ func GetServeMux() *http.ServeMux {
 				fmt.Fprintln(rw, http.StatusInternalServerError)
 				return
 			}
-			session.Set(config.TokenName, token)
+			strToken := fmt.Sprintf("%x", md5.Sum(token))
+			session.Set(config.TokenName, strToken)
+			session.Set(strToken, plainText)
 			session.Set("username", username)
-			cookie := http.Cookie{
-				Name:     config.TokenName,
-				Value:    string(token),
-				Path:     "/",
-				HttpOnly: true,
-				MaxAge:   int(config.TokenTimeOut),
-			}
-			http.SetCookie(rw, &cookie)
-
+			rw.Header().Add(config.TokenName, strToken)
 			message := &model.Message{Code: 200}
 			j, err := json.Marshal(message)
 			if err != nil {

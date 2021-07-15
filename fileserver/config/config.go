@@ -4,7 +4,7 @@ var (
 	Port           int
 	Dir            string //file server root dir
 	AbsDir         string
-	TokenName      = "LOGIN-ACESS-TOKEN"
+	TokenName      = "Login-Acess-Token"
 	TokenKey       = "yuioplkj"
 	TokenTimeOut   = 3600
 	PwdCryKey      = "hjknmcop"

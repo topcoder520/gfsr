@@ -43,9 +43,6 @@
                 return
             }
             var shalpassword = hex_sha1($('#txtPassword').val());
-            console.log(shalpassword);
-            shalpassword = b64_sha1(shalpassword);
-            console.log(shalpassword);
             $.ajax({
                 url:"/api/login",
                 method:"POST",
@@ -60,7 +57,7 @@
                         alert(data.msg)
                         return
                     }else{
-                        window.location.href="/files/";
+                       window.location.href="/files/";
                     }
                 }
             })

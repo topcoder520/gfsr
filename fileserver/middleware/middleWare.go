@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/topcoder520/gfsr/fileserver/config"
+	"github.com/topcoder520/gfsr/fileserver/handler"
 	"github.com/topcoder520/gfsr/fileserver/logs"
 	"github.com/topcoder520/gfsr/fileserver/session"
 )
@@ -29,6 +30,10 @@ func FileServerMiddleWare(next http.Handler) http.Handler {
 		if !strings.HasPrefix(uri, "/login") && !strings.HasPrefix(uri, "/api/login") && !strings.HasPrefix(uri, "/static/") {
 			token := session.Get(config.TokenName)
 			if token == nil {
+				if strings.HasPrefix(uri, "/api/") {
+					handler.Fail(300, "", rw)
+					return
+				}
 				//跳转登录页面
 				http.Redirect(rw, r, "/login", http.StatusFound)
 				return
@@ -37,6 +42,10 @@ func FileServerMiddleWare(next http.Handler) http.Handler {
 			//获取请求的token
 			reToken := r.Header.Get(config.TokenName)
 			if reToken != token {
+				if strings.HasPrefix(uri, "/api/") {
+					handler.Fail(300, "", rw)
+					return
+				}
 				//跳转登录页面
 				http.Redirect(rw, r, "/login", http.StatusFound)
 				return
@@ -44,11 +53,19 @@ func FileServerMiddleWare(next http.Handler) http.Handler {
 			strtoken := session.Get(token)
 			fiels := strings.Split(strtoken.(string), "@")
 			if len(fiels) < 2 {
+				if strings.HasPrefix(uri, "/api/") {
+					handler.Fail(300, "", rw)
+					return
+				}
 				logs.Println("fiels len less 2")
 				http.Redirect(rw, r, "/login", http.StatusFound)
 				return
 			}
 			if r.RemoteAddr != fiels[0] {
+				if strings.HasPrefix(uri, "/api/") {
+					handler.Fail(300, "", rw)
+					return
+				}
 				http.Redirect(rw, r, "/login", http.StatusFound)
 				return
 			}

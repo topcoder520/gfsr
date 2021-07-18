@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -28,6 +29,10 @@ func GetServeMux() *http.ServeMux {
 
 	mux.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
 		//http.RedirectHandler("/files/", http.StatusOK)
+	})
+
+	mux.HandleFunc("/files/", func(rw http.ResponseWriter, r *http.Request) {
+		fileServerHandler.ServeHTTP(rw, r)
 	})
 
 	mux.HandleFunc("/static/", func(rw http.ResponseWriter, r *http.Request) {
@@ -91,22 +96,43 @@ func GetServeMux() *http.ServeMux {
 			session.Set(config.TokenName, strToken)
 			session.Set(strToken, plainText)
 			session.Set("username", username)
-			rw.Header().Add(config.TokenName, strToken)
-			message := &model.Message{Code: 200}
-			j, err := json.Marshal(message)
-			if err != nil {
-				fmt.Fprintln(rw, http.StatusInternalServerError)
-				return
-			}
-			fmt.Fprintln(rw, string(j))
+			rw.Header().Set(config.TokenName, strToken)
+			Success(nil, rw)
 		} else {
 			rw.WriteHeader(http.StatusMethodNotAllowed)
 			fmt.Fprintln(rw, "request method do not allow 'GET'")
 		}
 	})
 
-	mux.HandleFunc("/files/", func(rw http.ResponseWriter, r *http.Request) {
-		fileServerHandler.ServeHTTP(rw, r)
+	mux.HandleFunc("/api/files/", func(rw http.ResponseWriter, r *http.Request) {
+		handler := http.StripPrefix("/api/files/", http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			f, err := os.Open(path.Join(config.AbsDir, r.URL.Path))
+			if err != nil {
+				Fail(500, err.Error(), rw)
+				return
+			}
+			defer f.Close()
+			fileInfos, err := f.Readdir(0)
+			if err != nil {
+				Fail(500, err.Error(), rw)
+				return
+			}
+			rs := make([]model.FileInfo, len(fileInfos))
+			for _, fileInfo := range fileInfos {
+				file := model.FileInfo{
+					Name:    fileInfo.Name(),
+					Path:    path.Join(r.URL.Path, fileInfo.Name()),
+					Size:    int(fileInfo.Size()),
+					IsDir:   fileInfo.IsDir(),
+					ModTime: fileInfo.ModTime().Format("2006-01-02 15:04:05"),
+					Mode:    fileInfo.Mode().String(),
+				}
+				rs = append(rs, file)
+			}
+			Success(rs, rw)
+		}))
+		handler.ServeHTTP(rw, r)
 	})
+
 	return mux
 }

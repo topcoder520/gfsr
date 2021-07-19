@@ -2,11 +2,11 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"strings"
 
 	"github.com/topcoder520/gfsr/client/cmd"
+	"github.com/topcoder520/gfsr/client/colorp"
 	"github.com/topcoder520/gfsr/client/request"
 	"github.com/topcoder520/gfsr/client/sha1"
 )
@@ -17,14 +17,14 @@ func main() {
 		if request.IsLogout {
 			err := Start()
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				colorp.ErrorPrintln(err.Error())
 				continue
 			}
 		}
-		fmt.Print(">>> ")
+		colorp.LineHeaderInfo()
 		args, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			colorp.ErrorPrintln(err.Error())
 			continue
 		}
 		args = strings.TrimSuffix(args, "\n")
@@ -36,7 +36,7 @@ func main() {
 		os.Args = append(os.Args, cmdArgs...)
 		cmd.NewRootCmd()
 		if err = cmd.RootCmd.Execute(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			colorp.ErrorPrintln(err.Error())
 			continue
 		}
 		cmd.ResetCommand()

@@ -106,7 +106,8 @@ func GetServeMux() *http.ServeMux {
 
 	mux.HandleFunc("/api/files/", func(rw http.ResponseWriter, r *http.Request) {
 		handler := http.StripPrefix("/api/files/", http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-			f, err := os.Open(path.Join(config.AbsDir, r.URL.Path))
+			p := path.Join("/", path.Clean(r.URL.Path))
+			f, err := os.Open(path.Join(config.AbsDir, p))
 			if err != nil {
 				Fail(500, err.Error(), rw)
 				return
@@ -130,6 +131,40 @@ func GetServeMux() *http.ServeMux {
 				rs = append(rs, file)
 			}
 			Success(rs, rw)
+		}))
+		handler.ServeHTTP(rw, r)
+	})
+
+	mux.HandleFunc("/api/handlecmd/", func(rw http.ResponseWriter, r *http.Request) {
+		handler := http.StripPrefix("/api/handlecmd/", http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			cmd := r.URL.Path
+			switch cmd {
+			case "cd":
+				cdpath := r.URL.Query().Get("cdpath")
+				if len(strings.Trim(cdpath, " ")) == 0 {
+					Fail(500, "cdpath is empty string", rw)
+					return
+				}
+				cdpath = path.Join("/", path.Clean(cdpath))
+				cdpath = path.Join(config.AbsDir, cdpath)
+				f, err := os.Open(cdpath)
+				if err != nil {
+					Fail(int(ErrorFileNotFoundStatus), err.Error(), rw)
+					return
+				}
+				fi, err := f.Stat()
+				if err != nil {
+					Fail(int(ErrorFileNotFoundStatus), err.Error(), rw)
+					return
+				}
+				if !fi.IsDir() {
+					Fail(int(ErrorFileNotFoundStatus), "path is not direct", rw)
+					return
+				}
+				Success("", rw)
+				return
+			}
+			Success("", rw)
 		}))
 		handler.ServeHTTP(rw, r)
 	})

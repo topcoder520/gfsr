@@ -9,11 +9,11 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            //"program": "D:/Golang/workspace/src/github.com/topcoder520/gfsr/fileserver/main.go",
-            "program": "D:/Golang/workspace/src/github.com/topcoder520/gfsr/client/main.go",
+            "program": "D:/Golang/workspace/src/github.com/topcoder520/gfsr/fileserver/main.go",
+            //"program": "D:/Golang/workspace/src/github.com/topcoder520/gfsr/client/main.go",
             "env": {},
             //"args": ["http","-p","8080"] //http
-            //"args": ["https","-p","8080","--ca","./cert/ca.pem","--ser","./cert/server.pem","--key","./cert/server.key"] //https
+            "args": ["https","-p","8080","--ca","./cert/ca.pem","--ser","./cert/server.pem","--key","./cert/server.key"] //https
         }
     ]
 }

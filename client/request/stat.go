@@ -17,8 +17,10 @@ var IsLogout bool = true //是否退出
 type Status int
 
 const (
-	OKStatus        Status = 200 //请求成功
-	FailLoginStatus Status = 300 //登录失败
+	OKStatus                Status = 200 //请求成功
+	FailLoginStatus         Status = 300 //登录失败
+	ErrorFileNotFoundStatus Status = 400 //文件错误
+	ErrorRequestStatus      Status = 500 //请求错误
 )
 
 var TokenValue string

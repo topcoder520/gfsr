@@ -8,6 +8,15 @@ import (
 	"github.com/topcoder520/gfsr/fileserver/model"
 )
 
+type Status int
+
+const (
+	OKStatus                Status = 200 //请求成功
+	FailLoginStatus         Status = 300 //登录失败
+	ErrorFileNotFoundStatus Status = 400 //文件错误
+	ErrorRequestStatus      Status = 500 //请求错误
+)
+
 func Success(data interface{}, w http.ResponseWriter) {
 	message := &model.Message{}
 	message.Code = 200

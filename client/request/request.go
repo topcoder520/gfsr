@@ -11,6 +11,13 @@ func GetDirFiles(dir string) (*model.Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Println(string(rs))
+	return ParseResult(rs)
+}
+
+func HandleCdCmd(cmd, cdPath string) (*model.Message, error) {
+	rs, err := Get(path.Join("/api/handlecmd/", cmd) + "?cdpath=" + cdPath)
+	if err != nil {
+		return nil, err
+	}
 	return ParseResult(rs)
 }

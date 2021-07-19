@@ -2,6 +2,8 @@ package request
 
 import (
 	"errors"
+
+	"github.com/topcoder520/gfsr/client/config"
 )
 
 func Login(username, pwd string) error {
@@ -19,5 +21,6 @@ func Login(username, pwd string) error {
 	if message.Code != int(OKStatus) {
 		return errors.New(message.Msg)
 	}
+	config.UserName = username
 	return nil
 }

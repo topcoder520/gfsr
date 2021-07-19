@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gookit/color"
 	"github.com/spf13/cobra"
+	"github.com/topcoder520/gfsr/client/colorp"
 	"github.com/topcoder520/gfsr/client/config"
 	"github.com/topcoder520/gfsr/client/model"
 	"github.com/topcoder520/gfsr/client/request"
@@ -23,17 +23,17 @@ func InitLsCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			defer func() {
 				if err := recover(); err != nil {
-					fmt.Println(err)
+					colorp.ErrorPrintln(err.(string))
 				}
 			}()
-			RunFunc(args)
+			runFunc(args)
 		},
 	}
 	LsCmd.Flags().BoolVarP(&l, "l", "l", false, "list file info ")
 	return LsCmd
 }
 
-func RunFunc(args []string) {
+func runFunc(args []string) {
 	lsPath := ""
 	if len(args) > 0 {
 		lsPath = path.Join(config.CurrentPath, path.Clean(args[0]))
@@ -42,7 +42,7 @@ func RunFunc(args []string) {
 	}
 	message, err := request.GetDirFiles(lsPath)
 	if err != nil {
-		fmt.Println(err)
+		colorp.ErrorPrintln(err.Error())
 		return
 	}
 	if message.Data == nil {
@@ -93,11 +93,11 @@ func Table(list []model.FileInfo) {
 		if len(strings.Trim(f.Name, " ")) > 0 {
 			str := fmt.Sprintf("%s   %s %s   %s\n", f.Mode, handleStr(strconv.Itoa(int(f.Size)), maxLength), f.ModTime, handleStr(f.Name, maxLength))
 			if f.IsDir {
-				color.Bluep(str) //dir
+				colorp.BluePrint(str) //dir
 			} else if strings.Contains(f.Mode, "x") {
-				color.Greenp(str) //exe
+				colorp.BluePrint(str) //exe
 			} else {
-				color.White.Print(str) //file
+				colorp.WhitePrint(str) //file
 			}
 		}
 	}
@@ -121,11 +121,11 @@ func List(list []model.FileInfo) {
 	for _, f := range list {
 		if len(strings.Trim(f.Name, " ")) > 0 {
 			if f.IsDir {
-				color.Bluep(" ", f.Name, "  ") //dir
+				colorp.BluePrint(" " + f.Name + "  ") //dir
 			} else if strings.Contains(f.Mode, "x") {
-				color.Greenp(" ", f.Name, "  ") //exe
+				colorp.GreenPrint(" " + f.Name + "  ") //exe
 			} else {
-				color.White.Print(" ", f.Name, "  ") //file
+				colorp.WhitePrint(" " + f.Name + "  ") //file
 			}
 		}
 	}

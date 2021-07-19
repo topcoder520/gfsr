@@ -14,6 +14,8 @@ func NewRootCmd() {
 		Short: "file client",
 	}
 	RootCmd.AddCommand(InitLsCmd())
+	RootCmd.AddCommand(InitPwdCmd())
+	RootCmd.AddCommand(InitCdCmd())
 }
 
 func ResetCommand() {

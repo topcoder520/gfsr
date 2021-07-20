@@ -16,6 +16,7 @@ func NewRootCmd() {
 	RootCmd.AddCommand(InitLsCmd())
 	RootCmd.AddCommand(InitPwdCmd())
 	RootCmd.AddCommand(InitCdCmd())
+	RootCmd.AddCommand(InitDownloaderCmd())
 }
 
 func ResetCommand() {

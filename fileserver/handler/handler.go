@@ -158,7 +158,7 @@ func GetServeMux() *http.ServeMux {
 					return
 				}
 				if !fi.IsDir() {
-					Fail(int(ErrorFileNotFoundStatus), "path is not direct", rw)
+					Fail(int(ErrorFileNotDirStatus), "path is not direct", rw)
 					return
 				}
 				Success("", rw)
